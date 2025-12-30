@@ -1,0 +1,50 @@
+# .github/workflows/daily_monitor.yml
+name: Daily Stock Monitor
+
+on:
+  # 設定排程執行 (Cron Job)
+  schedule:
+    # 這是 UTC 時間！台灣是 UTC+8
+    # 所以如果你想在台灣時間早上 09:00 執行，要設成 UTC 01:00
+    # 語法: '分 時 日 月 週'
+    # 每天 01:00 UTC，週一到週五 (1-5) 執行
+    - cron: '0 1 * * 1-5'
+  
+  # 允許手動點擊按鈕觸發 Workflow (方便測試用)
+  workflow_dispatch:
+
+jobs:
+  run_scraper:
+    # 使用最新的 Ubuntu Linux 環境
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步驟 1: 下載你的程式碼
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 步驟 2: 設定 Python 環境
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # 建議指定一個穩定的 Python 版本
+
+      # 步驟 3: 安裝 Python 套件 (從 requirements.txt)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # 步驟 4: 安裝 Playwright 的瀏覽器 (這是最容易漏掉但關鍵的一步！)
+      # Playwright 需要真實的瀏覽器內核才能運行
+      - name: Install Playwright Browsers
+        run: |
+          playwright install chromium # 我們只用 Chromium，所以只安裝它
+
+      # 步驟 5: 執行爬蟲腳本
+      - name: Run Python Scraper Script
+        # 將 GitHub Secrets 中的 Webhook 網址注入到環境變數中
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python main.py
