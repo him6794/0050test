@@ -65,7 +65,7 @@ def run(playwright: Playwright) -> None:
         
         # 準備 Markdown 格式的 Discord 訊息
         message_lines = [
-            f"**0050 前十大成分股權重監控**", 
+            f"**0050 前五大成分股權重監控**", 
             f"**更新時間**: {time.strftime('%Y-%m-%d %H:%M:%S')}",
             "```text" # Discord 的程式碼區塊，用於等寬字體排版
         ]
